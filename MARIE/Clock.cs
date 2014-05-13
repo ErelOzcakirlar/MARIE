@@ -22,7 +22,7 @@ namespace MARIE
         public Clock()
         {
             timer = new Timer();
-            timer.Interval = 1000;
+            timer.Interval = 50;
             timer.Tick += new System.EventHandler(this.timer_Tick);
             _momentSignal = 0;
         }

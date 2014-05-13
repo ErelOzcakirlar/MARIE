@@ -146,16 +146,16 @@ namespace MARIE
                             break;
 
                         case 8://Skipcond T4
-                            bool[] ContentIR = this.IR.output();
+                            bool[] ContentMBR = this.MBR.output();
                             bool[] ContentAC = this.AC.output();
-                            if (!ContentIR[4] && !ContentIR[5])//IR(11-10)=00 
+                            if (!ContentMBR[4] && !ContentMBR[5])//MBR(11-10)=00 
                             {
                                 if (ContentAC[0])
                                 {
                                     this.PC.increment();// AC < 0
                                 }
                             }
-                            else if (!ContentIR[4] && ContentIR[5])//IR(11-10)=01
+                            else if (!ContentMBR[4] && ContentMBR[5])//MBR(11-10)=01
                             {
                                 bool value = true;
                                 for (int i = 0; i < 16; i++)
@@ -171,7 +171,7 @@ namespace MARIE
                                     this.PC.increment();// AC = 0
                                 }
                             }
-                            else if (ContentIR[4] && !ContentIR[5])//IR(11-10)=10
+                            else if (ContentMBR[4] && !ContentMBR[5])//MBR(11-10)=10
                             {
                                 if (!ContentAC[0])
                                 {

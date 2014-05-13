@@ -66,9 +66,15 @@ namespace MARIE
                 {
                     if (Command[2])
                     {
-                        if (Command[3])//1011 Opcode
+                        if (Command[3])//1011 Opcode AddI X
                         {
-                            
+                            FullAdder.setCin(false);
+                            FullAdder.setA(AC.output());
+                            FullAdder.setB(MBR.output());
+                            AC.Enable = true;
+                            AC.input(FullAdder.Output);
+                            E = FullAdder.Cout;
+                            AC.Enable = false;
                         }
                         else//1010 Opcode
                         {

@@ -21,14 +21,14 @@ namespace MARIE
         public Form1()
         {
             InitializeComponent();
-            marie = new Computer(MARvalue,PCvalue,ACvalue,MBRvalue,IRvalue,InRegValue,OutRegValue);
+            marie = new Computer(MARvalue, PCvalue, ACvalue, MBRvalue, IRvalue, InRegValue, OutRegValue);
             Labels = new List<KeyValuePair<String, String>>();
             origin = 0;
             loaded = false;
             printMarie();
             MemoryView.DataSource = memory;
             LabelView.DataSource = Labels;
-            
+
         }
 
         private void printMarie()
@@ -117,7 +117,7 @@ namespace MARIE
                     bool[] CurrentFour = encode16_4(item);
                     for (int i = 3; i >= 0; i--)
                     {
-                        bits[j] = CurrentFour[i]; 
+                        bits[j] = CurrentFour[i];
                         j--;
                     }
                 }
@@ -144,7 +144,7 @@ namespace MARIE
                     counter--;
                 }
             }
-            
+
             return bits;
         }
 
@@ -164,7 +164,7 @@ namespace MARIE
             String Code = CodeBox.Text;
             if (!String.IsNullOrEmpty(Code))
             {
-               
+
                 bool accepted = true;
 
                 List<bool[]> Program = new List<bool[]>();
@@ -172,36 +172,36 @@ namespace MARIE
                 Labels = new List<KeyValuePair<String, String>>();
 
                 char[] Splitter = { '\n' };
-                String[] Lines = Code.Split(Splitter,StringSplitOptions.RemoveEmptyEntries);
-                Splitter = new char[]{ ' ' };
-                String[] FirstWords = Lines[0].Split(Splitter,StringSplitOptions.RemoveEmptyEntries);
+                String[] Lines = Code.Split(Splitter, StringSplitOptions.RemoveEmptyEntries);
+                Splitter = new char[] { ' ' };
+                String[] FirstWords = Lines[0].Split(Splitter, StringSplitOptions.RemoveEmptyEntries);
                 if (FirstWords[0].ToUpper().Equals("ORG"))
                 {
-                        if (FirstWords.Length == 2)
+                    if (FirstWords.Length == 2)
+                    {
+                        try
                         {
-                            try
-                            {
-                                origin = byte.Parse(FirstWords[1]);
-                                List<String>LinesList = Lines.ToList();
-                                LinesList.RemoveAt(0);
-                                Lines = LinesList.ToArray();
-                            }
-                            catch (Exception ex)
-                            {
-                                accepted = false;
-                                MessageBox.Show("Hata! Satır:0\n" + ex.Message);
-                                
-                            }
+                            origin = byte.Parse(FirstWords[1]);
+                            List<String> LinesList = Lines.ToList();
+                            LinesList.RemoveAt(0);
+                            Lines = LinesList.ToArray();
                         }
-                        else
+                        catch (Exception ex)
                         {
                             accepted = false;
-                            MessageBox.Show("Hata! Satır:0\nEksik komut");
+                            MessageBox.Show("Hata! Satır:0\n" + ex.Message);
+
                         }
+                    }
+                    else
+                    {
+                        accepted = false;
+                        MessageBox.Show("Hata! Satır:0\nEksik komut");
+                    }
                 }
                 for (int i = 0; i < Lines.Length; i++)//First Compile
                 {
-                    String[] Words = Lines[i].Split(Splitter,StringSplitOptions.RemoveEmptyEntries);
+                    String[] Words = Lines[i].Split(Splitter, StringSplitOptions.RemoveEmptyEntries);
                     if (Words[0].ToUpper().Equals("JNS"))
                     {
                         if (Words.Length == 2)
@@ -357,7 +357,8 @@ namespace MARIE
                             break;
                         }
                     }
-                    else if(Words[0].ToUpper().Equals("INPUT")){
+                    else if (Words[0].ToUpper().Equals("INPUT"))
+                    {
                         bool[] Word = new bool[16];
                         Word[0] = false;
                         Word[1] = true;
@@ -365,7 +366,7 @@ namespace MARIE
                         Word[3] = true;
                         for (int j = 0; j < 12; j++)
                         {
-                            Word[i + 4] = false;
+                            Word[j + 4] = false;
                         }
                         Program.Add(Word);
                     }
@@ -378,7 +379,7 @@ namespace MARIE
                         Word[3] = false;
                         for (int j = 0; j < 12; j++)
                         {
-                            Word[i + 4] = false;
+                            Word[j + 4] = false;
                         }
                         Program.Add(Word);
                     }
@@ -391,11 +392,11 @@ namespace MARIE
                         Word[3] = true;
                         for (int j = 0; j < 12; j++)
                         {
-                            Word[i + 4] = false;
+                            Word[j + 4] = false;
                         }
                         Program.Add(Word);
                     }
-                    else if (Words[0].ToUpper().Equals("JUMP"))
+                    else if (Words[0].ToUpper().Equals("SKIPCOND"))
                     {
                         if (Words.Length == 2)
                         {
@@ -426,16 +427,47 @@ namespace MARIE
                             break;
                         }
                     }
+                    else if (Words[0].ToUpper().Equals("JUMP"))
+                    {
+                        if (Words.Length == 2)
+                        {
+                            bool[] Word = new bool[16];
+                            Word[0] = true;
+                            Word[1] = false;
+                            Word[2] = false;
+                            Word[3] = true;
+                            Program.Add(Word);
+                            if (Char.IsLetter(Words[1][0]))
+                            {
+                                if (!LabelList.Contains(Words[1]))
+                                {
+                                    LabelList.Add(Words[1]);
+                                }
+                            }
+                            else
+                            {
+                                accepted = false;
+                                MessageBox.Show("Hata! Satır:" + i.ToString() + "\nRakam ile başlayan etiket");
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            accepted = false;
+                            MessageBox.Show("Hata! Satır:" + i.ToString() + "\nEksik komut");
+                            break;
+                        }
+                    }
                     else if (Words[0].ToUpper().Equals("CLEAR"))
                     {
                         bool[] Word = new bool[16];
                         Word[0] = true;
                         Word[1] = false;
-                        Word[2] = false;
-                        Word[3] = true;
+                        Word[2] = true;
+                        Word[3] = false;
                         for (int j = 0; j < 12; j++)
                         {
-                            Word[i + 4] = false;
+                            Word[j + 4] = false;
                         }
                         Program.Add(Word);
                     }
@@ -569,7 +601,7 @@ namespace MARIE
                     }
                     else if (Char.IsLetter(Words[0][0]))
                     {
-                        Words[0] = Words[0].Replace(",","");
+                        Words[0] = Words[0].Replace(",", "");
                         if (Words.Length == 3)
                         {
                             if (Words[1].ToUpper().Equals("DEC"))
@@ -580,7 +612,7 @@ namespace MARIE
                                 KeyValuePair<String, String> Pair = new KeyValuePair<String, String>(Key, Value);
                                 Labels.Add(Pair);
                             }
-                            else if(Words[1].ToUpper().Equals("HEX"))
+                            else if (Words[1].ToUpper().Equals("HEX"))
                             {
                                 Program.Add(hexToBits(Words[2]));
                                 String Key = Words[0];
@@ -595,13 +627,53 @@ namespace MARIE
                                 break;
                             }
                         }
-                        else if (!LabelList.Contains(Words[0]))
+                        else
                         {
-                            LabelList.Add(Words[0]);
-                            String Key = Words[0];
-                            String Value = bitsToHex(decToBits((i + origin).ToString()));
-                            KeyValuePair<String, String> Pair = new KeyValuePair<String, String>(Key, Value);
-                            Labels.Add(Pair);
+                            if (!LabelList.Contains(Words[0]))
+                            {
+                                LabelList.Add(Words[0]);
+                                String Key = Words[0];
+                                String Value = bitsToHex(decToBits((i + origin).ToString()));
+                                KeyValuePair<String, String> Pair = new KeyValuePair<String, String>(Key, Value);
+                                Labels.Add(Pair);
+
+                                List<String> TempList = Lines.ToList();
+                                TempList.RemoveAt(i);
+                                Lines = TempList.ToArray();
+                                i--;
+                            }
+                            else
+                            {
+                                bool found = false;
+                                foreach (KeyValuePair<String, String> pair in Labels)
+                                {
+                                    if (pair.Key.Equals(Words[0]))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (found)
+                                {
+                                    accepted = false;
+                                    MessageBox.Show("Hata! Bu etiket daha önce kullanıldı");
+                                    break;
+                                }
+                                else
+                                {
+                                    LabelList.Add(Words[0]);
+                                    String Key = Words[0];
+                                    String Value = bitsToHex(decToBits((i + origin).ToString()));
+                                    KeyValuePair<String, String> Pair = new KeyValuePair<String, String>(Key, Value);
+                                    Labels.Add(Pair);
+
+                                    List<String> TempList = Lines.ToList();
+                                    TempList.RemoveAt(i);
+                                    Lines = TempList.ToArray();
+                                    i--;
+                                }
+
+                            }
                         }
                     }
                     else
@@ -634,7 +706,7 @@ namespace MARIE
                 }
                 if (accepted)
                 {
-                    for(int i = 0; i < Lines.Length; i++)//Second Compile
+                    for (int i = 0; i < Lines.Length; i++)//Second Compile
                     {
                         String[] Words = Lines[i].Split(Splitter, StringSplitOptions.RemoveEmptyEntries);
                         if (Words.Length > 1)
@@ -664,7 +736,7 @@ namespace MARIE
                     marie.load(Program, origin);
                     printMarie();
                 }
-                
+
             }
             else
             {
@@ -676,7 +748,7 @@ namespace MARIE
         {
             if (loaded)
             {
-                marie.run(origin,MemoryView);
+                marie.run(origin, MemoryView);
                 printMarie();
             }
             else
